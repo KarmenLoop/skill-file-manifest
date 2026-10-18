@@ -1,0 +1,21 @@
+{
+  "files": [
+    {
+      "path": "brief.txt",
+      "bytes": 33,
+      "sha256": "b7985acf108277ca4efceb4a79dbda3c9120d90508baea8072fbd7a27bb70148"
+    },
+    {
+      "path": "copy.txt",
+      "bytes": 33,
+      "sha256": "b7985acf108277ca4efceb4a79dbda3c9120d90508baea8072fbd7a27bb70148"
+    }
+  ],
+  "total_bytes": 66,
+  "duplicate_groups": [
+    [
+      "brief.txt",
+      "copy.txt"
+    ]
+  ]
+}

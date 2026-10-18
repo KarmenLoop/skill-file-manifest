@@ -1,0 +1,7 @@
+{
+  "root": "examples/files",
+  "paths": [
+    "brief.txt",
+    "copy.txt"
+  ]
+}

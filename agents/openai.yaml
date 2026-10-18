@@ -1,0 +1,4 @@
+interface:
+  display_name: "KarmenLoop File Manifest"
+  short_description: "File Manifest with reproducible local checks"
+  default_prompt: "Use $karmen-file-manifest to create checksums and a duplicate report for these delivery files."
