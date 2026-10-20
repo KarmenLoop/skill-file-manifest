@@ -3,7 +3,7 @@ name: karmen-file-manifest
 description: "Create a verifiable manifest for a selected set of local files. Use when a user needs a handoff inventory, duplicate check, or delivery checksum."
 metadata:
   author: KarmenLoop
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # File Manifest
