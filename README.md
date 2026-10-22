@@ -1,115 +1,60 @@
-# KarmenLoop File Manifest
+# File Manifest
 
-File Manifest records the files in a handoff: their names, sizes, and SHA-256 hashes. It also spots files with identical contents.
+English | [简体中文](README.zh-CN.md)
 
-By [KarmenLoop](https://github.com/KarmenLoop).
+Know which files are in a handoff and whether two entries contain the same bytes. Select the files under one local directory; the helper records their sizes, SHA-256 hashes, and duplicate groups.
 
-[![Release](https://img.shields.io/github/v/release/KarmenLoop/skill-file-manifest)](https://github.com/KarmenLoop/skill-file-manifest/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](docs/INPUT.md)
-[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](docs/COMPATIBILITY.md)
+[Download v0.2.1](https://github.com/KarmenLoop/skill-file-manifest/releases/tag/v0.2.1) · [Tutorial](docs/tutorial.en.md) · [Input reference](docs/INPUT.md) · [Report an issue](https://github.com/KarmenLoop/skill-file-manifest/issues)
 
-[Download](https://github.com/KarmenLoop/skill-file-manifest/releases) · [Quick start](#quick-start) · [Documentation](#documentation) · [Contribute](CONTRIBUTING.md) · [Contact](https://github.com/KarmenLoop/skill-file-manifest/issues)
+## What it does
 
-The code is [MIT licensed](LICENSE). The local helper needs Python 3.9 or later, with no subscription or provider API key.
+brief.txt and copy.txt contain identical bytes, so the sample puts both paths in one duplicate group.
 
-## Introduction
+Files are read locally. The helper does not upload, rename, delete, or decide which duplicate to keep; symlink components are rejected.
 
-Choose the directory and the exact files to include. The helper reads only that selection, rejects links and paths outside the directory, and stops if it detects a file changing during the read. Files are hashed in chunks rather than loaded into memory at once.
+![File Manifest sample JSON output from version 0.2.1](docs/images/example-output-v0.2.1.svg)
 
-The package includes an agent skill, a local Python helper, example data, and tests. The skill guides the conversation; the helper processes the supplied data.
+*Actual local output from v0.2.1, rendered as an image. [Complete result](examples/expected.json) · [Image provenance](docs/images/provenance.json).*
 
-## Capabilities
+## Start here
 
-- Hash files in bounded chunks.
-- Identify duplicate content by SHA-256.
-- Reject path escapes, symbolic links, and non-regular files.
-
-## Quick start
-
-Requirements: Python 3.9+. Git is needed only for cloning; downloading the release archive also works. On Windows, replace python3 with py -3 if that is your installed launcher.
+Download `karmen-file-manifest-v0.2.1.zip` and its `.sha256` file from the release, verify the hash, then extract the ZIP. In the extracted directory, use Python 3.9 or later:
 
 ```sh
-git clone https://github.com/KarmenLoop/skill-file-manifest.git
-cd skill-file-manifest
-python3 scripts/run.py --input examples/input.json
-python3 -m unittest discover -s tests -v
-```
-
-Compare the result with [examples/expected.json](examples/expected.json). For your own data, follow the [input format](docs/INPUT.md). Relative file paths are resolved from the directory where you run the command.
-
-To save a result without overwriting an existing file:
-
-```sh
-python3 scripts/run.py --input examples/input.json --output result.json
-```
-
-### Use a pipeline
-
-Pass `--input -` to read the same JSON format from standard input:
-
-```sh
-cat examples/input.json | python3 scripts/run.py --input -
 python3 scripts/run.py --version
+python3 scripts/run.py --input examples/input.json
 ```
 
-On PowerShell, use `Get-Content -Raw examples/input.json | python scripts/run.py --input -`.
-The input limit and validation are the same for files and pipelines. Add `--output result.json` to save a new file.
+Expected version: `karmen-file-manifest 0.2.1`. brief.txt and copy.txt contain identical bytes, so the sample puts both paths in one duplicate group.
 
-### Install the agent skill
-
-Install it for the agent host you use:
+To install the complete skill into a host that reads `~/.agents/skills`:
 
 ```sh
-python3 install.py --host codex
-# Alternatives: --host deepseek, --host grok, or --host agents
+python3 install.py --host agents
 ```
 
-The installer copies the skill into your host's skill directory. It stops if that directory already exists. To choose another location, pass `--destination` with a new directory. Host settings, credentials, permissions, and other skills are left alone.
+The installer refuses an existing destination. Host discovery and invocation vary; see the [full setup and practice guide](docs/tutorial.en.md). You can run the helper directly without an AI host.
 
-In Codex, invoke $karmen-file-manifest. In Grok Build, invoke /karmen-file-manifest. In another compatible host, select the installed skill by name. Example request:
+## Use it with your own work
 
-> Make a manifest for these files so the recipient can check the handoff.
+Set root to the directory you intend to inspect. List explicit relative file paths in paths; keep them inside root and use real files rather than symbolic links.
 
-Refresh your host's skill discovery if needed. See [compatibility and its verification limits](docs/COMPATIBILITY.md).
+Create a second manifest after editing a copied file. Compare hashes to distinguish a renamed identical file from a changed file; review duplicates before any manual cleanup.
 
-## How it works
+Read the [field contract](docs/INPUT.md) before preparing a new input. The helper runs locally with the Python standard library; it needs no model account, API key, or network connection. An AI host has its own data and permission settings.
 
-Each selected file is checked for scope and type, streamed through SHA-256, and grouped by digest. Changes detected while reading fail the operation.
+## Questions
 
-The result is JSON, so you can save it or pass it to another tool. Exit code `0` means the helper finished, even when its findings need attention. Exit code `2` means the input or a file operation failed. The helper does not run shell commands from the input or overwrite an existing output file.
+**Does a matching hash prove a download is trustworthy?** It proves byte agreement with that hash. Obtain the expected hash through a source you trust; it does not prove authorship or safety.
 
-## Documentation
+**Where does the result go?** JSON is printed to stdout unless you request a new file with `--output`. Existing output files are preserved. The helper reads only the submitted records and any local paths documented in its input contract.
 
-- [Agent instructions](SKILL.md): selection, workflow, and completion criteria.
-- [Input and output](docs/INPUT.md): fields and complete example.
-- [Compatibility](docs/COMPATIBILITY.md): installation targets and host limits.
-- [Validation](docs/VALIDATION.md): observed local results and acceptance scenarios.
-- [Sources](docs/SOURCES.md): public research references and design decisions.
-- [Changelog](CHANGELOG.md): release history.
+## Documentation and support
 
-## Limitations
-
-The helper reads explicitly listed regular files only. Limits are 1,000 files, 64 MiB per file, and 512 MiB total. It is not a filesystem sandbox and cannot prevent concurrent replacement by another process.
-
-Examples are synthetic. Local tests establish the covered helper behavior; they do not establish an authenticated provider integration or the quality of every future model response. Tools and account access remain those of the host.
-
-## Contributing
-
-Bug reports, focused improvements, documentation fixes, and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), include a sanitized reproduction, and run the tests. Development needs no third-party runtime dependency.
-
-## Support
-
-Use [GitHub Issues](https://github.com/KarmenLoop/skill-file-manifest/issues) for bugs and feature requests. [SUPPORT.md](SUPPORT.md) explains what to include. Never attach keys, customer records, or private conversations.
+- [Download, install, configure, practice, upgrade, and remove](docs/tutorial.en.md)
+- [Input/output contract](docs/INPUT.md) and [compatibility](docs/COMPATIBILITY.md)
+- [Changelog](CHANGELOG.md), [contributing](CONTRIBUTING.md), [support](SUPPORT.md), and [security reports](SECURITY.md)
 
 ## License
 
-Copyright © 2026 KarmenLoop. [MIT](LICENSE) permits commercial use and secondary development under its terms. Third-party services retain their own terms; see [NOTICE.md](NOTICE.md).
-
-## Acknowledgements
-
-This is an independent KarmenLoop implementation. [Research notes](docs/SOURCES.md) identify public design references from the Meta, DeepSeek, and xAI ecosystems as applicable. No upstream code or brand assets are bundled, and no affiliation or endorsement is claimed.
-
-## Contact
-
-[KarmenLoop](https://github.com/KarmenLoop) · [Issues](https://github.com/KarmenLoop/skill-file-manifest/issues) · [Security reporting](SECURITY.md)
+[MIT](LICENSE). Keep the license and [notice](NOTICE.md) with redistributed copies. Maintained by [KarmenLoop](https://karmenloop.com).
